@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doodle Jump MiniApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <style>
+    body { margin: 0; background: #000; overflow: hidden; }
+    canvas { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+<script>
+let score = 0;
+let scoreText;
+let maxHeight = 0;
+
+const config = {
+    type: Phaser.AUTO,
+    width: 300,
+    height: 500,
+    backgroundColor: '#2d2d2d',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload,
+        create,
+        update
+    }
+};
+
+let player;
+let platforms;
+let cursors;
+
+new Phaser.Game(config);
+
+function preload () {
+    this.load.image('platform', 'https://labs.phaser.io/assets/sprites/platform.png');
+    this.load.image('doodle', 'https://labs.phaser.io/assets/sprites/yellow_ball.png');
+}
+
+function create () {
+    platforms = this.physics.add.staticGroup();
+    for (let y = 100; y < 500; y += 100) {
+        let x = Phaser.Math.Between(0, 260);
+        platforms.create(x, y, 'platform').setScale(0.5, 0.5).refreshBody();
+    }
+
+    player = this.physics.add.sprite(150, 450, 'doodle').setScale(0.5);
+    player.setCollideWorldBounds(true);
+
+    this.physics.add.collider(player, platforms, () => {
+        if (player.body.velocity.y > 0) {
+            player.setVelocityY(-300);  // прыжок
+        }
+    });
+
+    cursors = this.input.keyboard.createCursorKeys();
+
+    scoreText = this.add.text(10, 10, 'Score: 0', { fontSize: '16px', fill: '#fff' });
+}
+
+function update () {
+    if (cursors.left.isDown) {
+        player.setVelocityX(-160);
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(160);
+    } else {
+        player.setVelocityX(0);
+    }
+
+    // Обновление счета по высоте
+    let currentHeight = Math.round((500 - player.y));
+    if (currentHeight > maxHeight) {
+        maxHeight = currentHeight;
+        score = maxHeight;
+        scoreText.setText('Score: ' + score);
+        localStorage.setItem('doodle_highscore', score);
+    }
+
+    // Игра окончена
+    if (player.y > 520) {
+        const hs = localStorage.getItem('doodle_highscore') || 0;
+        alert('Game Over!\nYour score: ' + score + '\nHigh score: ' + hs);
+        location.reload();
+    }
+}
+</script>
+</body>
+</html>
