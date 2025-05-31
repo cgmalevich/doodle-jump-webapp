@@ -2,93 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Doodle Jump Clone</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doodle Jump Mini App</title>
   <style>
-    body { margin: 0; background: #000; overflow: hidden; }
-    canvas { display: block; margin: auto; touch-action: none; }
+    body { margin: 0; background: #fff; text-align: center; font-family: sans-serif; }
+    #logo { width: 200px; margin-top: 40px; }
+    #menu { margin-top: 20px; }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-<script>
-let game, cursors, player, platforms, score = 0, highscore = 0;
-let accelX = 0;
-
-const config = {
-  type: Phaser.AUTO,
-  width: 360,
-  height: 600,
-  parent: 'phaser-example',
-  physics: {
-    default: 'arcade',
-    arcade: { gravity: { y: 1000 }, debug: false }
-  },
-  scene: { preload, create, update }
-};
-
-window.addEventListener("deviceorientation", e => {
-  if (e.gamma !== null) accelX = e.gamma;
-}, true);
-
-function preload() {
-  this.load.image('bg', 'https://i.ibb.co/kxBmqLk/bg-stars.jpg');
-  this.load.image('platform', 'https://i.ibb.co/MgW0DF3/grass.png');
-  this.load.image('player', 'https://i.ibb.co/yyc1xGL/hero.png');
-}
-
-function create() {
-  this.bg = this.add.tileSprite(180, 300, 360, 600, 'bg').setScrollFactor(0);
-  platforms = this.physics.add.staticGroup();
-  for (let y = 100; y < 600; y += 100) {
-    platforms.create(Phaser.Math.Between(50, 310), y, 'platform').setScale(0.5).refreshBody();
-  }
-
-  player = this.physics.add.sprite(180, 500, 'player').setScale(0.3);
-  player.setCollideWorldBounds(true);
-  player.setBounce(0.2);
-
-  this.physics.add.collider(player, platforms, () => {
-    if (player.body.velocity.y > 0) {
-      player.setVelocityY(-600);
+  <img src="images/logo.png" id="logo" alt="Logo" />
+  <div id="menu">
+    <button onclick="startGame()">Играть</button>
+    <button onclick="exitGame()">Выйти</button>
+  </div>
+  <audio id="bgm" src="sounds/bg_music.mp3" loop></audio>
+  <script>
+    function startGame() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("bgm").play();
+      alert("Тут будет игра :)");
     }
-  });
-
-  cursors = this.input.keyboard.createCursorKeys();
-  this.cameras.main.startFollow(player, false, 0, 1, 0, 100);
-  scoreText = this.add.text(10, 10, '', { fontSize: '16px', fill: '#fff' }).setScrollFactor(0);
-}
-
-function update() {
-  const vx = cursors.left?.isDown ? -200 :
-             cursors.right?.isDown ? 200 :
-             accelX ? accelX * 15 : 0;
-
-  player.setVelocityX(Phaser.Math.Clamp(vx, -300, 300));
-
-  if (player.y < 300) {
-    platforms.children.iterate(p => {
-      p.y += 4;
-      if (p.y > 600) {
-        p.y = 0;
-        p.x = Phaser.Math.Between(50, 310);
-        score += 10;
-      }
-    });
-    this.bg.tilePositionY -= 2;
-  }
-
-  scoreText.setText('Score: ' + score + '  Highscore: ' + Math.max(score, localStorage.getItem('dj_hs') || 0));
-
-  if (player.y > 620) {
-    const best = Math.max(score, localStorage.getItem('dj_hs') || 0);
-    localStorage.setItem('dj_hs', best);
-    alert('Game Over!\nScore: ' + score + '\nHighscore: ' + best);
-    location.reload();
-  }
-}
-
-game = new Phaser.Game(config);
-</script>
+    function exitGame() {
+      location.reload();
+    }
+  </script>
 </body>
 </html>
